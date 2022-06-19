@@ -1,19 +1,30 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:projek_akhir/About.dart';
 import 'package:projek_akhir/LandingPage.dart';
+import 'package:projek_akhir/Logreg.dart';
 import 'package:projek_akhir/Profil.dart';
 import 'package:projek_akhir/warna.dart';
 
 import 'formInput.dart';
 
 class More extends StatelessWidget {
-  const More({Key? key}) : super(key: key);
+  More({Key? key}) : super(key: key);
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
+    Future<void> logout() async {
+      try {
+        await _auth.signOut();
+      } catch (e) {
+        throw e;
+      }
+    }
+
     GestureDetector daftarMore(param1, param2, param3) {
       return GestureDetector(
         onTap: () {
@@ -21,6 +32,9 @@ class More extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (_) {
+                if (param2 == "Logout") {
+                  logout();
+                }
                 return param3;
               },
             ),
@@ -90,15 +104,6 @@ class More extends StatelessWidget {
             ),
             daftarMore(
               Icon(
-                Icons.person,
-                color: pink,
-                size: 50,
-              ),
-              'Akun',
-              Profil(),
-            ),
-            daftarMore(
-              Icon(
                 Icons.home,
                 color: pink,
                 size: 50,
@@ -114,6 +119,15 @@ class More extends StatelessWidget {
               ),
               'Tentang Kita',
               About(),
+            ),
+            daftarMore(
+              Icon(
+                Icons.logout,
+                color: pink,
+                size: 50,
+              ),
+              'Logout',
+              Logreg(),
             ),
           ],
         ),

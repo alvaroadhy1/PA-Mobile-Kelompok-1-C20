@@ -16,6 +16,11 @@ class TextController extends GetxController {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
 
+  loginregis() {
+    email = emailCtrl.text.obs;
+    pass = passCtrl.text.obs;
+  }
+
   tambah(param) {
     param.add({
       'tanggal': tanggalCtrl.text,

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:projek_akhir/LandingPage.dart';
 import 'package:projek_akhir/register.dart';
@@ -5,7 +6,25 @@ import 'package:projek_akhir/warna.dart';
 import 'package:get/get.dart';
 
 class Login extends StatelessWidget {
-  const Login({Key? key}) : super(key: key);
+  Login({Key? key}) : super(key: key);
+
+  static final snackbar = SnackBar(
+    content: Text(
+      "Username atau Password Salah!",
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: pink,
+  );
+  static final snackbarSukses = SnackBar(
+    content: Text(
+      "Login Berhasil!",
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: biru,
+  );
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passController = TextEditingController();
 
   Container textFieldPassword(double panjangLayar) {
     return Container(
@@ -33,6 +52,7 @@ class Login extends StatelessWidget {
             ],
           ),
           child: TextField(
+            controller: _passController,
             cursorColor: coklat,
             decoration: InputDecoration(
               hintStyle: TextStyle(
@@ -82,6 +102,7 @@ class Login extends StatelessWidget {
             ],
           ),
           child: TextField(
+            controller: _emailController,
             cursorColor: coklat,
             decoration: InputDecoration(
               hintStyle: TextStyle(
@@ -105,34 +126,30 @@ class Login extends StatelessWidget {
     ));
   }
 
-  GestureDetector tombolLogin(context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => LandingPage()));
-      },
-      child: Container(
-        width: 200,
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: pink,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey,
-              offset: const Offset(5.0, 5.0),
-              blurRadius: 5.0,
-              spreadRadius: 0.5,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            "Login",
-            style: TextStyle(
-              fontSize: 19,
-              color: Colors.white,
-            ),
+  Container tombolLogin(context) {
+    return Container(
+      // Navigator.pushReplacement(
+      //     context, MaterialPageRoute(builder: (_) => LandingPage()));
+      width: 200,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: pink,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: const Offset(5.0, 5.0),
+            blurRadius: 5.0,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          "Login",
+          style: TextStyle(
+            fontSize: 19,
+            color: Colors.white,
           ),
         ),
       ),
@@ -143,6 +160,19 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     var panjangLayar = MediaQuery.of(context).size.width;
     var tinggiLayar = MediaQuery.of(context).size.height;
+
+    Future<void> signIn() async {
+      try {
+        FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _emailController.text, password: _passController.text);
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => LandingPage()));
+        ScaffoldMessenger.of(context).showSnackBar(snackbarSukses);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      }
+    }
+
     return Scaffold(
         body: Container(
       width: panjangLayar,
@@ -184,7 +214,12 @@ class Login extends StatelessWidget {
           SizedBox(
             height: 40,
           ),
-          tombolLogin(context),
+          GestureDetector(
+            onTap: () {
+              signIn();
+            },
+            child: tombolLogin(context),
+          ),
           SizedBox(
             height: 40,
           ),

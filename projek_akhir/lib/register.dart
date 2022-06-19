@@ -1,13 +1,35 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:projek_akhir/Ctrl.dart';
 import 'package:projek_akhir/login.dart';
 import 'package:projek_akhir/warna.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-class Register extends StatelessWidget {
-  Register({Key? key}) : super(key: key);
-  final TextController textCtrl = Get.put(TextController());
+class Register extends StatefulWidget {
+  const Register({Key? key}) : super(key: key);
+
+  @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passController = TextEditingController();
+  TextEditingController _confirmController = TextEditingController();
+
+  static final snackbar = SnackBar(
+    content: Text(
+      "Silakan Masukkan Password yang Sama!",
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: pink,
+  );
+  static final snackbarSukses = SnackBar(
+    content: Text(
+      "Registrasi Berhasil!",
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: biru,
+  );
 
   Container textFieldPassword(double panjangLayar) {
     return Container(
@@ -35,6 +57,7 @@ class Register extends StatelessWidget {
             ],
           ),
           child: TextField(
+            controller: _passController,
             cursorColor: coklat,
             decoration: InputDecoration(
               hintStyle: TextStyle(
@@ -84,7 +107,7 @@ class Register extends StatelessWidget {
             ],
           ),
           child: TextField(
-            controller: textCtrl.emailCtrl,
+            controller: _emailController,
             cursorColor: coklat,
             decoration: InputDecoration(
               hintStyle: TextStyle(
@@ -134,7 +157,7 @@ class Register extends StatelessWidget {
             ],
           ),
           child: TextField(
-            controller: textCtrl.passCtrl,
+            controller: _confirmController,
             cursorColor: coklat,
             decoration: InputDecoration(
               hintStyle: TextStyle(
@@ -160,10 +183,20 @@ class Register extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAuth _auth = FirebaseAuth.instance;
+    Future<void> signUp() async {
+      FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: _emailController.text, password: _passController.text)
+          .then((value) {
+        Get.offAll(Login());
+      }).catchError((e) {
+        print(e);
+      });
+    }
 
     var panjangLayar = MediaQuery.of(context).size.width;
     var tinggiLayar = MediaQuery.of(context).size.height;
+    FirebaseAuth _auth = FirebaseAuth.instance;
     return Scaffold(
         body: Container(
       width: panjangLayar,
@@ -172,7 +205,9 @@ class Register extends StatelessWidget {
           color: krem,
           image: DecorationImage(
               image: AssetImage('assets/bg1.png'), fit: BoxFit.fill)),
-      child: ListView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             height: 100,
@@ -202,7 +237,23 @@ class Register extends StatelessWidget {
           SizedBox(
             height: 40,
           ),
-          tombolLogin(_auth, textCtrl),
+          textFieldConfirmPass(panjangLayar),
+          SizedBox(
+            height: 40,
+          ),
+          GestureDetector(
+            onTap: () {
+              if (_passController.text == _confirmController.text) {
+                signUp();
+                ScaffoldMessenger.of(context).showSnackBar(snackbarSukses);
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => Login()));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(snackbar);
+              }
+            },
+            child: tombolLogin(),
+          ),
           SizedBox(
             height: 40,
           ),
@@ -227,41 +278,28 @@ class Register extends StatelessWidget {
     ));
   }
 
-  GestureDetector tombolLogin(_auth, textCtrl) {
-    return GestureDetector(
-      onTap: () async {
-        try {
-          UserCredential userCredential =
-              await _auth.signInWithEmailAndPassword(
-            email: textCtrl.emailCtrl.text,
-            password: textCtrl.passCtrl.text,
-          );
-        } catch (e) {
-          throw e;
-        }
-      },
-      child: Container(
-        width: 200,
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: pink,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey,
-              offset: const Offset(5.0, 5.0),
-              blurRadius: 5.0,
-              spreadRadius: 0.5,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            "Register",
-            style: TextStyle(
-              fontSize: 19,
-              color: Colors.white,
-            ),
+  Container tombolLogin() {
+    return Container(
+      width: 200,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: pink,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: const Offset(5.0, 5.0),
+            blurRadius: 5.0,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          "Register",
+          style: TextStyle(
+            fontSize: 19,
+            color: Colors.white,
           ),
         ),
       ),
